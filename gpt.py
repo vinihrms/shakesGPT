@@ -3,12 +3,12 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 # hyperparameters
-batch_size = 64 # how many independent sequences will we process in parallel?
-block_size = 256 # what is the maximum context length for predictions?
-max_iters = 5000
-eval_interval = 500
+batch_size = 16
+block_size = 96
+max_iters = 10000
+eval_interval = 200
 learning_rate = 3e-4
-import torch
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 print("CUDA disponível:", torch.cuda.is_available())
 if torch.cuda.is_available():
@@ -16,9 +16,9 @@ if torch.cuda.is_available():
     print("VRAM:", round(
         torch.cuda.get_device_properties(0).total_memory / 1024**3, 2
     ), "GB")
-eval_iters = 20
-n_embd = 384
-n_head = 6
+eval_iters = 100
+n_embd = 320
+n_head = 5
 n_layer = 6
 dropout = 0.2
 # ------------
