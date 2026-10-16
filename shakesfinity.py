@@ -1,12 +1,21 @@
 
-# Geração infinita usando o modelo já treinado em memória
+# Carrega os pesos já treinados
+model = GPTLanguageModel().to(device)
+model.load_state_dict(
+    torch.load("shakegpt.pth", map_location=device, weights_only=True)
+)
+model.eval()
+
+print("Modelo treinado carregado!")
+print("Gerando Shakespeare infinitamente...")
+print("Arquivo: shakespeare_infinito.txt")
+print("Pressione Ctrl+C para parar.")
+
 import time
 
-model.eval()
 context = torch.zeros((1, 1), dtype=torch.long, device=device)
 total_chars = 0
-
-print("Shakespeare infinito iniciado! Ctrl+C para parar.")
+chunk_size = 1000
 
 try:
     with open("shakespeare_infinito.txt", "a", encoding="utf-8") as f:
@@ -14,10 +23,9 @@ try:
             with torch.no_grad():
                 generated = model.generate(
                     context,
-                    max_new_tokens=1000
+                    max_new_tokens=chunk_size
                 )
 
-            # Pega apenas os caracteres recém-gerados
             new_tokens = generated[0, context.shape[1]:].tolist()
             new_text = decode(new_tokens)
 
@@ -25,10 +33,14 @@ try:
             f.flush()
 
             total_chars += len(new_text)
-            print(f"Gerados {total_chars:,} caracteres")
+            print(
+                f"[{time.strftime('%H:%M:%S')}] "
+                f"+{len(new_text)} caracteres | "
+                f"Total nesta execução: {total_chars:,}"
+            )
 
-            # Preserva o contexto recente
             context = generated[:, -block_size:]
 
 except KeyboardInterrupt:
-    print(f"\nGeração encerrada. Total: {total_chars:,} caracteres.")
+    print("\nGeração interrompida!")
+    print(f"Total gerado: {total_chars:,} caracteres")
